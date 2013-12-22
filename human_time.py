@@ -70,7 +70,7 @@ re_time_periods = "day|weekday|weekend|month|{}|{}".format(re_day_names, re_mont
 time_periods = re_time_periods.split("|")
 
 """You can define hours:mins in many ways"""
-re_12_hour_time = r"(?:[0-9]|1[0-2])(?:am|pm)"# 4pm
+re_12_hour_time = r"(?:[0-9]|1[0-2])(?:am|pm)?"# 4pm
 re_12_hourmin_time = r"(?:[0-9]|1[0-2]):(?:[0-5][0-9])(?:am|pm)"# 4:30pm
 re_24_hour_time = r"(?:[01]?[0-9]|2[0-3]):?(?:[0-5][0-9])"# 1630, 16:30
 re_time_names = r"(?:noon|midday|morning)"
@@ -264,7 +264,7 @@ pipes = (
         _generator_day,
     ),
     
-    # We are looking for a day name (e.g. tusday) with a time after it (e.g. 8pm)
+    # We are looking for a day name (e.g. tuesday) with a time after it (e.g. 8pm)
     # we have some regex patterns already defined up the top
     # our filter/map pipeline will ensure it's a weekday of the type found and apply the time
     # these two functions use the named regex groups to pull the correct part from the text
@@ -323,12 +323,12 @@ mis-entered by a user.
 """
 _clean_regex = re.compile(r'^every ?')
 def _clean(s):
-    s = _clean_regex.sub('', s)
+    s = _clean_regex.sub('', s.lower().strip())
     
     while "  " in s:
         s = s.replace("  ", " ")
     
-    return s.lower().strip()
+    return s.strip()
 
 """
 The main function. It returns the generator, a fuller readme
@@ -342,6 +342,10 @@ def parse(timestring, start_time=None):
     
     for v in filter_function(generator_function(now=start_time)):
         yield v
+
+def parse_amount(timestring, start_time=None, amount=1):
+    gen = parse(timestring, start_time)
+    return [gen.__next__() for i in range(amount)]
 
 if __name__ == '__main__':
     import sys

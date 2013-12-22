@@ -7,6 +7,13 @@ from datetime import datetime
 class HTTester(unittest.TestCase):
     def test_parse(self):
         vals = (
+            # Check it's case insensitive
+            ("Every Tuesday", (
+                datetime(2013, 12, 10),
+                datetime(2013, 12, 17),
+                datetime(2013, 12, 24),
+            )),
+            
             ("every tuesday", (
                 datetime(2013, 12, 10),
                 datetime(2013, 12, 17),
