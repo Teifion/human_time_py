@@ -72,6 +72,24 @@ class HTTester(unittest.TestCase):
                 datetime(2014, 1, 21, 14, 30),
                 datetime(2014, 2, 21, 14, 30),
             )),
+
+            ("every Monday at this time", (
+                datetime(2013, 12, 9, 6, 20),
+                datetime(2013, 12, 16, 6, 20),
+                datetime(2013, 12, 23, 6, 20),
+            )),
+
+            ("every other Sunday at current time", (
+                datetime(2013, 12, 8, 6, 20),
+                datetime(2013, 12, 22, 6, 20),
+            )),
+
+            ("15th of every month at this time", (
+                datetime(2013, 12, 15, 6, 20),
+                datetime(2014, 1, 15, 6, 20),
+                datetime(2014, 2, 15, 6, 20),
+            )),
+
         )
         
         """
@@ -95,12 +113,16 @@ class HTTester(unittest.TestCase):
             second=5,
         )
         
+        # Display AssertionError exception 
+        # with custom msg in assertEqual
+        self.longMessage = True
+
         for str_in, expected in vals:
             gen = human_time.parse(str_in, start_time=start_time)
             
             for e in expected:
                 r = next(gen)
-                self.assertEqual(e, r)
+                self.assertEqual(e, r, str_in)
 
 if __name__ == '__main__':
     unittest.main()

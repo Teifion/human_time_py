@@ -48,7 +48,6 @@ Add a new entry to pipes, one of the first entries has extra comments to help.
 
 -- Todo --
 I'm pretty sure the pipes regex search could be improved if it were an actual parser.
-Add support for relative times such as "this time every week"
 """
 
 import calendar
@@ -74,7 +73,8 @@ re_12_hour_time = r"(?:[0-9]|1[0-2])(?:am|pm)"# 4pm
 re_12_hourmin_time = r"(?:[0-9]|1[0-2]):(?:[0-5][0-9])(?:am|pm)"# 4:30pm
 re_24_hour_time = r"(?:[01]?[0-9]|2[0-3]):?(?:[0-5][0-9])"# 1630, 16:30
 re_time_names = r"(?:noon|midday|morning)"
-re_all_time_names = r"(?:{}|{}|{}|{})".format(re_12_hour_time, re_12_hourmin_time, re_24_hour_time, re_time_names)
+re_this_time = r"(?:(this|current) time)"
+re_all_time_names = r"(?:{}|{}|{}|{}|{})".format(re_12_hour_time, re_12_hourmin_time, re_24_hour_time, re_time_names, re_this_time)
 
 day_indexes = dict(
     monday    = [0],
@@ -109,7 +109,7 @@ def compose(f1=idfunc, f2=idfunc, *more_funcs):
 
 """Generators create a sequence of datetimes with a regular interval"""
 def _generator_day(now):
-    d = datetime(now.year, now.month, now.day)
+    d = datetime(now.year, now.month, now.day, now.hour, now.minute)
     while True:
         d = d + timedelta(days=1)
         yield d
@@ -200,7 +200,8 @@ to it before yielding it on.
 _compiled_12_hour_time = re.compile(re_12_hour_time.replace("?:", ""))
 _compiled_12_hourmin_time = re.compile(re_12_hourmin_time.replace("?:", ""))
 _compiled_24_hour_time = re.compile(re_24_hour_time.replace("?:", ""))
-_comiled_time_names = re.compile(re_time_names.replace("?:", ""))
+_compiled_time_names = re.compile(re_time_names.replace("?:", ""))
+_compiled_this_time = re.compile(re_this_time)
 def _apply_time(regex_result):
     the_time = regex_result.groupdict()['applicant']
     
@@ -243,7 +244,7 @@ def _apply_time(regex_result):
         return f
     
     # Named time
-    r = _comiled_time_names.match(the_time)
+    r = _compiled_time_names.match(the_time)
     if r:
         hour, minute = time_indexes[r.groups()[0]]
         
@@ -252,7 +253,22 @@ def _apply_time(regex_result):
                 yield datetime(v.year, v.month, v.day, hour, minute)
         return f
     
+    # Relative time
+    r = _compiled_this_time.match(the_time)
+    if r:
+        def f(gen):
+            for v in gen:
+                yield v
+        return f
+
     raise Exception("Unable to find time applicant for '{}'".format(the_time))
+
+def _cut_time(regex_result):
+    def f(gen):
+        for v in gen:
+            yield datetime(v.year, v.month, v.day)
+    return f
+
 
 # A matching regex
 # a list of functions to compose
@@ -260,7 +276,7 @@ def _apply_time(regex_result):
 pipes = (
     # Days
     (re.compile(r"^(?P<principle>{})$".format(re_all_day_names)),
-        [_filter_weekday],
+        [_cut_time, _filter_weekday],
         _generator_day,
     ),
     
@@ -273,20 +289,26 @@ pipes = (
         [_apply_time, _filter_weekday],
         _generator_day,
     ),
+
+    (re.compile(r"^other (?P<principle>{}) at (?P<applicant>{})$".format(re_all_day_names, re_all_time_names)),
+        [_apply_time, _filter_everyother, _filter_weekday],
+        _generator_day,
+    ),
+
     
     (re.compile(r"^other (?P<principle>{})$".format(re_all_day_names)),
-        [_filter_everyother, _filter_weekday],
+        [_cut_time, _filter_everyother, _filter_weekday],
         _generator_day,
     ),
     
     # Months
     (re.compile(r"^(?P<selector>{}) (?P<principle>{}) of every month$".format(re_all_selector_names, re_day_names)),
-        [_filter_identifier_in_month],
+        [_cut_time, _filter_identifier_in_month],
         _generator_day,
     ),
     
     (re.compile(r"^(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of every (?P<principle>month)$"),
-        [_filter_day_number_in_month],
+        [_cut_time, _filter_day_number_in_month],
         _generator_day,
     ),
     
@@ -303,7 +325,7 @@ pipes = (
     # Default implementation
     (re.compile(r"^(?P<principle>{})$".format(re_time_periods)),
         [],
-        _generator_day,
+        _generator_day
     ),
 )
 
