@@ -25,8 +25,8 @@ You can test this module by running it with the string after the file name (you 
 or without any arguments in which case it will prompt you for an input.
 
 
-Readme for developers/maintainers/people that want to use the code
-==================================================================
+Outline of how it does it
+=========================
 
 parse() cleans up the input searches through the pipes for a valid handler
 once a handler is found we are given a base generator and a set of filter functions
