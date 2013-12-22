@@ -345,6 +345,12 @@ def parse(timestring, start_time=None):
 
 if __name__ == '__main__':
     import sys
+
+    try:
+        input = raw_input
+    except NameError:
+        pass
+
     if len(sys.argv) > 1:
         time_string = " ".join(sys.argv[1:])
     else:
@@ -376,5 +382,5 @@ if __name__ == '__main__':
     print(time_string)
     g = parse(time_string)
     for i in range(5):
-        print(g.__next__())
+        print(next(g))
     print("")

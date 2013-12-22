@@ -87,19 +87,19 @@ class HTTester(unittest.TestCase):
         29 30 31
         """
         start_time = datetime(
-            year = 2013,
-            month = 12,
-            day = 4,
-            hour = 6,
-            minute = 20,
-            second = 5,
+            year=2013,
+            month=12,
+            day=4,
+            hour=6,
+            minute=20,
+            second=5,
         )
         
         for str_in, expected in vals:
             gen = human_time.parse(str_in, start_time=start_time)
             
             for e in expected:
-                r = gen.__next__()
+                r = next(gen)
                 self.assertEqual(e, r)
 
 if __name__ == '__main__':
