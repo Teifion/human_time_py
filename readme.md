@@ -43,10 +43,10 @@ Where f is a filter/applier function and g is the generator. Filters will discar
 not meeting their criteria while appliers will alter values passing through them. In principle
 the signature for each is identical, the only difference lies in their use/purpose.
 
--- To add a new handler --
+-- To add a new handler --  
 Add a new entry to pipes, one of the first entries has extra comments to help.
 
--- Todo --
+-- Todo --  
 I'm pretty sure the pipes regex search could be improved if it were an actual parser.
 Add support for relative times such as "this time every week"
 
