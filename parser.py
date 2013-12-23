@@ -8,9 +8,7 @@ The parser side of things
 try:
     from . import filters, generators, consts
 except ValueError:
-    import filters
-    import generators
-    import consts
+    import filters, generators, consts
 
 from datetime import datetime
 import re

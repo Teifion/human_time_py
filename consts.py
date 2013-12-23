@@ -1,6 +1,9 @@
 """
 A set of strings used to build certain regular expressions. Additionally
 we define our function composition function here.
+
+We build up the patterns later and only save them as strings here because
+this allows us more flexibility in using them later.
 """
 
 re_all_selector_names = "first|1st|second|2nd|third|3rd|fourth|4th|last"
@@ -26,7 +29,10 @@ re_this_time = r"(?:(this|current) time)"
 re_all_time_names = r"(?:{}|{}|{}|{}|{})".format(re_12_hour_time, re_12_hourmin_time, re_24_hour_time, re_time_names, re_this_time)
 
 
-"""Allows us to compose functions"""
+"""
+Allows us to compose functions
+For those familiar with Haskell it's the same as the dot operator
+"""
 idfunc = lambda x: x
 def compose(f1=idfunc, f2=idfunc, *more_funcs):
     # Allows us an unlimited number of functions
