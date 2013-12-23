@@ -351,7 +351,6 @@ def parse_amount(timestring, start_time=None, amount=1):
 
 if __name__ == '__main__':
     import sys
-    
     try:
         input = raw_input
     except NameError:
