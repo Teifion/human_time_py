@@ -1,6 +1,11 @@
-"Written by Tefion Jordan"
+# I can't work out why but I'm currently getting errors
+# about it being a non-package and thus not able to use
+# relative imports
+try:
+    from . import parser
+except ValueError:
+    import parser
 
-import human_time
 import unittest
 from datetime import datetime
 
@@ -118,7 +123,7 @@ class HTTester(unittest.TestCase):
         self.longMessage = True
 
         for str_in, expected in vals:
-            gen = human_time.parse(str_in, start_time=start_time)
+            gen = parser.parse(str_in, start_time=start_time)
             
             for e in expected:
                 r = next(gen)
