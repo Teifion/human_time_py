@@ -70,12 +70,16 @@ re_time_periods = "day|weekday|weekend|month|{}|{}".format(re_day_names, re_mont
 time_periods = re_time_periods.split("|")
 
 """You can define hours:mins in many ways"""
-re_12_hour_time = r"(?:[0-9]|1[0-2])(?:am|pm)"# 4pm
-re_12_hourmin_time = r"(?:[0-9]|1[0-2]):(?:[0-5][0-9])(?:am|pm)"# 4:30pm
+re_12_hour_time = r"(?:[0-9]|1[0-2])(?:am|pm)?"# 4pm
+re_12_hourmin_time = r"(?:[0-9]|1[0-2]):(?:[0-5][0-9])(?:am|pm)?"# 4:30pm
 re_24_hour_time = r"(?:[01]?[0-9]|2[0-3]):?(?:[0-5][0-9])"# 1630, 16:30
 re_time_names = r"(?:noon|midday|morning)"
+<<<<<<< HEAD
 re_this_time = r"(?:(this|current) time)"
 re_all_time_names = r"(?:{}|{}|{}|{}|{})".format(re_12_hour_time, re_12_hourmin_time, re_24_hour_time, re_time_names, re_this_time)
+=======
+re_all_time_names = r"(?:{}|{}|{}|{})".format(re_12_hourmin_time, re_12_hour_time, re_24_hour_time, re_time_names)
+>>>>>>> master
 
 day_indexes = dict(
     monday    = [0],
@@ -210,17 +214,32 @@ def _apply_time(regex_result):
                            v.day, hour, minute)
 
     the_time = regex_result.groupdict()['applicant']
+<<<<<<< HEAD
 
     # First try it for 12 hour time
     r = _compiled_12_hour_time.match(the_time)
+=======
+    
+    # 24 hour time?
+    r = _compiled_24_hour_time.match(the_time)
+>>>>>>> master
     if r:
-        hour, suffix = r.groups()
+        hour, minute = r.groups()
         hour = int(hour)
+<<<<<<< HEAD
         if suffix == "pm":
             hour += 12
         
         return partial(f_with_time, hour=hour)
 
+=======
+        minute = int(minute)
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour, minute)
+        return f
+    
+>>>>>>> master
     # 12 hour with minutes?
     r = _compiled_12_hourmin_time.match(the_time)
     if r:
@@ -230,16 +249,39 @@ def _apply_time(regex_result):
         if suffix == "pm":
             hour += 12
         
+<<<<<<< HEAD
         return partial(f_with_time, hour=hour, minute=minute)
 
     # Okay, 24 hour time?
     r = _compiled_24_hour_time.match(the_time)
+=======
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour, minute)
+        return f
+    
+    # 12 hour time without minutes
+    r = _compiled_12_hour_time.match(the_time)
+>>>>>>> master
     if r:
-        hour, minute = r.groups()
+        hour, suffix = r.groups()
         hour = int(hour)
+<<<<<<< HEAD
         minute = int(minute)
         return partial(f_with_time, hour=hour, minute=minute)
 
+=======
+        if suffix == "pm":
+            hour += 12
+        
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour)
+        return f
+    
+    
+    
+>>>>>>> master
     # Named time
     r = _compiled_time_names.match(the_time)
     if r:
@@ -273,7 +315,7 @@ pipes = (
         _generator_day,
     ),
     
-    # We are looking for a day name (e.g. tusday) with a time after it (e.g. 8pm)
+    # We are looking for a day name (e.g. tuesday) with a time after it (e.g. 8pm)
     # we have some regex patterns already defined up the top
     # our filter/map pipeline will ensure it's a weekday of the type found and apply the time
     # these two functions use the named regex groups to pull the correct part from the text
@@ -338,12 +380,12 @@ mis-entered by a user.
 """
 _clean_regex = re.compile(r'^every ?')
 def _clean(s):
-    s = _clean_regex.sub('', s)
+    s = _clean_regex.sub('', s.lower().strip())
     
     while "  " in s:
         s = s.replace("  ", " ")
     
-    return s.lower().strip()
+    return s.strip()
 
 """
 The main function. It returns the generator, a fuller readme
@@ -358,14 +400,25 @@ def parse(timestring, start_time=None):
     for v in filter_function(generator_function(now=start_time)):
         yield v
 
+def parse_amount(timestring, start_time=None, amount=1):
+    gen = parse(timestring, start_time)
+    return [next(gen) for i in range(amount)]
+
 if __name__ == '__main__':
     import sys
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
     try:
         input = raw_input
     except NameError:
         pass
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> master
     if len(sys.argv) > 1:
         time_string = " ".join(sys.argv[1:])
     else:
