@@ -345,7 +345,7 @@ def parse(timestring, start_time=None):
 
 def parse_amount(timestring, start_time=None, amount=1):
     gen = parse(timestring, start_time)
-    return [gen.__next__() for i in range(amount)]
+    return [next(gen) for i in range(amount)]
 
 if __name__ == '__main__':
     import sys
@@ -380,5 +380,5 @@ if __name__ == '__main__':
     print(time_string)
     g = parse(time_string)
     for i in range(5):
-        print(g.__next__())
+        print(next(g))
     print("")
