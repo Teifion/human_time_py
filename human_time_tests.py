@@ -106,7 +106,7 @@ class HTTester(unittest.TestCase):
             gen = human_time.parse(str_in, start_time=start_time)
             
             for e in expected:
-                r = gen.__next__()
+                r = next(gen)
                 self.assertEqual(e, r)
 
 if __name__ == '__main__':

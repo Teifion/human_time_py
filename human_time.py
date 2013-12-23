@@ -71,10 +71,10 @@ time_periods = re_time_periods.split("|")
 
 """You can define hours:mins in many ways"""
 re_12_hour_time = r"(?:[0-9]|1[0-2])(?:am|pm)?"# 4pm
-re_12_hourmin_time = r"(?:[0-9]|1[0-2]):(?:[0-5][0-9])(?:am|pm)"# 4:30pm
+re_12_hourmin_time = r"(?:[0-9]|1[0-2]):(?:[0-5][0-9])(?:am|pm)?"# 4:30pm
 re_24_hour_time = r"(?:[01]?[0-9]|2[0-3]):?(?:[0-5][0-9])"# 1630, 16:30
 re_time_names = r"(?:noon|midday|morning)"
-re_all_time_names = r"(?:{}|{}|{}|{})".format(re_12_hour_time, re_12_hourmin_time, re_24_hour_time, re_time_names)
+re_all_time_names = r"(?:{}|{}|{}|{})".format(re_12_hourmin_time, re_12_hour_time, re_24_hour_time, re_time_names)
 
 day_indexes = dict(
     monday    = [0],
@@ -204,17 +204,15 @@ _comiled_time_names = re.compile(re_time_names.replace("?:", ""))
 def _apply_time(regex_result):
     the_time = regex_result.groupdict()['applicant']
     
-    # First try it for 12 hour time
-    r = _compiled_12_hour_time.match(the_time)
+    # 24 hour time?
+    r = _compiled_24_hour_time.match(the_time)
     if r:
-        hour, suffix = r.groups()
+        hour, minute = r.groups()
         hour = int(hour)
-        if suffix == "pm":
-            hour += 12
-        
+        minute = int(minute)
         def f(gen):
             for v in gen:
-                yield datetime(v.year, v.month, v.day, hour)
+                yield datetime(v.year, v.month, v.day, hour, minute)
         return f
     
     # 12 hour with minutes?
@@ -231,16 +229,20 @@ def _apply_time(regex_result):
                 yield datetime(v.year, v.month, v.day, hour, minute)
         return f
     
-    # Okay, 24 hour time?
-    r = _compiled_24_hour_time.match(the_time)
+    # 12 hour time without minutes
+    r = _compiled_12_hour_time.match(the_time)
     if r:
-        hour, minute = r.groups()
+        hour, suffix = r.groups()
         hour = int(hour)
-        minute = int(minute)
+        if suffix == "pm":
+            hour += 12
+        
         def f(gen):
             for v in gen:
-                yield datetime(v.year, v.month, v.day, hour, minute)
+                yield datetime(v.year, v.month, v.day, hour)
         return f
+    
+    
     
     # Named time
     r = _comiled_time_names.match(the_time)
