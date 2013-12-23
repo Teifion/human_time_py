@@ -53,7 +53,6 @@ I'm pretty sure the pipes regex search could be improved if it were an actual pa
 import calendar
 import re
 from datetime import datetime, timedelta
-from functools import partial
 
 re_all_selector_names = "first|1st|second|2nd|third|3rd|fourth|4th|last"
 
@@ -204,13 +203,8 @@ _compiled_24_hour_time = re.compile(re_24_hour_time.replace("?:", ""))
 _compiled_time_names = re.compile(re_time_names.replace("?:", ""))
 _compiled_this_time = re.compile(re_this_time)
 def _apply_time(regex_result):
-    def f_with_time(gen, hour, minute=0):
-        for v in gen:
-            yield datetime(v.year, v.month, 
-                           v.day, hour, minute)
-
     the_time = regex_result.groupdict()['applicant']
-
+    
     # First try it for 12 hour time
     r = _compiled_12_hour_time.match(the_time)
     if r:
@@ -219,8 +213,11 @@ def _apply_time(regex_result):
         if suffix == "pm":
             hour += 12
         
-        return partial(f_with_time, hour=hour)
-
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour)
+        return f
+    
     # 12 hour with minutes?
     r = _compiled_12_hourmin_time.match(the_time)
     if r:
@@ -230,22 +227,32 @@ def _apply_time(regex_result):
         if suffix == "pm":
             hour += 12
         
-        return partial(f_with_time, hour=hour, minute=minute)
-
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour, minute)
+        return f
+    
     # Okay, 24 hour time?
     r = _compiled_24_hour_time.match(the_time)
     if r:
         hour, minute = r.groups()
         hour = int(hour)
         minute = int(minute)
-        return partial(f_with_time, hour=hour, minute=minute)
-
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour, minute)
+        return f
+    
     # Named time
     r = _compiled_time_names.match(the_time)
     if r:
         hour, minute = time_indexes[r.groups()[0]]
-        return partial(f_with_time, hour=hour, minute=minute)
-
+        
+        def f(gen):
+            for v in gen:
+                yield datetime(v.year, v.month, v.day, hour, minute)
+        return f
+    
     # Relative time
     r = _compiled_this_time.match(the_time)
     if r:
