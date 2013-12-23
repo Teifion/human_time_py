@@ -94,12 +94,12 @@ class HTTester(unittest.TestCase):
         29 30 31
         """
         start_time = datetime(
-            year = 2013,
-            month = 12,
-            day = 4,
-            hour = 6,
-            minute = 20,
-            second = 5,
+            year=2013,
+            month=12,
+            day=4,
+            hour=6,
+            minute=20,
+            second=5,
         )
         
         for str_in, expected in vals:
