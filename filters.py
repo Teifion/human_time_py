@@ -7,15 +7,8 @@ The id impletmentation would be _filter_allow
 
 import calendar
 import re
-from datetime import datetime
-
-# I can't work out why but I'm currently getting errors
-# about it being a non-package and thus not able to use
-# relative imports
-try:
-    from . import consts
-except ValueError:
-    import consts
+from datetime import datetime, timedelta
+import consts
 
 day_indexes = dict(
     monday    = [0],
@@ -185,4 +178,13 @@ def _cut_time(regex_result):
     def f(gen):
         for v in gen:
             yield datetime(v.year, v.month, v.day)
+    return f
+
+def _end_of_month(regex_result):
+    def f(gen):
+        for v in gen:
+            next_month = datetime(v.year, v.month, 28) + timedelta(days=4) 
+            last_day = next_month - timedelta(days=next_month.day)
+            if v.date() == last_day.date():
+                yield v
     return f

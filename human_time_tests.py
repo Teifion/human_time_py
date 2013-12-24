@@ -1,11 +1,4 @@
-# I can't work out why but I'm currently getting errors
-# about it being a non-package and thus not able to use
-# relative imports
-try:
-    from . import parser
-except ValueError:
-    import parser
-
+import parser
 import unittest
 from datetime import datetime
 
@@ -93,6 +86,17 @@ class HTTester(unittest.TestCase):
                 datetime(2013, 12, 15, 6, 20),
                 datetime(2014, 1, 15, 6, 20),
                 datetime(2014, 2, 15, 6, 20),
+            )),
+
+            ("end of every month", (
+                datetime(2013, 12, 31),
+                datetime(2014, 1, 31),
+                datetime(2014, 2, 28),
+            )),
+
+            ("end of every month at 18:00", (
+                datetime(2013, 12, 31, 18, 0),
+                datetime(2014, 1, 31, 18, 0),
             )),
 
         )
