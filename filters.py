@@ -7,6 +7,7 @@ The id impletmentation would be _filter_allow
 
 import calendar
 import re
+from functools import partial
 from datetime import datetime, timedelta
 import consts
 
@@ -143,6 +144,10 @@ _compiled_24_hour_time = re.compile(consts.re_24_hour_time.replace("?:", ""))
 _compiled_time_names = re.compile(consts.re_time_names.replace("?:", ""))
 _compiled_this_time = re.compile(consts.re_this_time)
 def _apply_time(regex_result):
+    def f(gen, hour, minute):
+        for v in gen:
+            yield datetime(v.year, v.month, v.day, hour, minute)
+
     the_time = regex_result.groupdict()['applicant']
     
     # First try it for 12 hour time
@@ -153,11 +158,8 @@ def _apply_time(regex_result):
         if suffix == "pm":
             hour += 12
         
-        def f(gen):
-            for v in gen:
-                yield datetime(v.year, v.month, v.day, hour)
-        return f
-    
+        return partial(f, hour=hour, minute=0)
+
     # 12 hour with minutes?
     r = _compiled_12_hourmin_time.match(the_time)
     if r:
@@ -167,10 +169,7 @@ def _apply_time(regex_result):
         if suffix == "pm":
             hour += 12
         
-        def f(gen):
-            for v in gen:
-                yield datetime(v.year, v.month, v.day, hour, minute)
-        return f
+        return partial(f, hour=hour, minute=minute)        
     
     # Okay, 24 hour time?
     r = _compiled_24_hour_time.match(the_time)
@@ -178,20 +177,13 @@ def _apply_time(regex_result):
         hour, minute = r.groups()
         hour = int(hour)
         minute = int(minute)
-        def f(gen):
-            for v in gen:
-                yield datetime(v.year, v.month, v.day, hour, minute)
-        return f
+        return partial(f, hour=hour, minute=minute)
     
     # Named time
     r = _compiled_time_names.match(the_time)
     if r:
         hour, minute = time_indexes[r.groups()[0]]
-        
-        def f(gen):
-            for v in gen:
-                yield datetime(v.year, v.month, v.day, hour, minute)
-        return f
+        return partial(f, hour=hour, minute=minute)      
     
     # Relative time
     r = _compiled_this_time.match(the_time)
