@@ -60,12 +60,12 @@ pipes = (
     
     # End of month
     (re.compile(r"^end of month$"), 
-        [filters._cut_time, filters._end_of_month], 
+        [filters._cut_time, filters._filter_end_of_month], 
         generators._generator_day
     ),
 
     (re.compile(r"^end of month at (?P<applicant>{})$".format(consts.re_all_time_names)), 
-        [filters._apply_time, filters._end_of_month], 
+        [filters._apply_time, filters._filter_end_of_month], 
         generators._generator_day
     ),
 
