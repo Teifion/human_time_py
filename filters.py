@@ -95,15 +95,10 @@ selector_indexes = dict(
 
 def _get_xs_in_month(x, year, month):
     """Used to get all Xs from a month where X is something like Tuesday"""
-    x_index = day_indexes[x][0]
-    
+    day_index = day_indexes[x][0]
     c = calendar.monthcalendar(year, month)
-    
-    results = []
-    for week in c:
-        if week[x_index]:
-            results.append(week[x_index])
-    
+    results = [week[day_index] for week in c if week[day_index]]
+
     return results
 
 
