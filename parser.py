@@ -2,14 +2,7 @@
 The parser side of things
 """
 
-# I can't work out why but I'm currently getting errors
-# about it being a non-package and thus not able to use
-# relative imports
-try:
-    from . import filters, generators, consts
-except ValueError:
-    import filters, generators, consts
-
+import filters, generators, consts
 from datetime import datetime
 import re
 
@@ -45,26 +38,38 @@ pipes = (
     ),
     
     # Months
-    (re.compile(r"^(?P<selector>{}) (?P<principle>{}) of every month$".format(consts.re_all_selector_names, consts.re_day_names)),
+    (re.compile(r"^(?P<selector>{}) (?P<principle>{}) of month$".format(consts.re_all_selector_names, consts.re_day_names)),
         [filters._cut_time, filters._filter_identifier_in_month],
         generators._generator_day,
     ),
     
-    (re.compile(r"^(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of every (?P<principle>month)$"),
+    (re.compile(r"^(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of (?P<principle>month)$"),
         [filters._cut_time, filters._filter_day_number_in_month],
         generators._generator_day,
     ),
     
-    (re.compile(r"^(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of every (?P<principle>month) at (?P<applicant>%s)$" % (consts.re_all_time_names)),
+    (re.compile(r"^(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of (?P<principle>month) at (?P<applicant>%s)$" % (consts.re_all_time_names)),
         [filters._apply_time, filters._filter_day_number_in_month],
         generators._generator_day,
     ),
     
-    (re.compile(r"^(?P<selector>{}) (?P<principle>{}) of every month at (?P<applicant>{})$".format(consts.re_all_selector_names, consts.re_day_names, consts.re_all_time_names)),
+    (re.compile(r"^(?P<selector>{}) (?P<principle>{}) of month at (?P<applicant>{})$".format(consts.re_all_selector_names, consts.re_day_names, consts.re_all_time_names)),
         [filters._apply_time, filters._filter_identifier_in_month],
         generators._generator_day,
     ),
     
+    # End of month
+    (re.compile(r"^end of month$"), 
+        [filters._cut_time, filters._filter_end_of_month], 
+        generators._generator_day
+    ),
+
+    (re.compile(r"^end of month at (?P<applicant>{})$".format(consts.re_all_time_names)), 
+        [filters._apply_time, filters._filter_end_of_month], 
+        generators._generator_day
+    ),
+
+
     # Default implementation
     (re.compile(r"^(?P<principle>{})$".format(consts.re_time_periods)),
         [],
@@ -86,7 +91,7 @@ def _find_pipes(item):
 Clean up a string, remove double-spacing etc. Anything that might have been
 mis-entered by a user.
 """
-_clean_regex = re.compile(r'^every ?')
+_clean_regex = re.compile(r'every')
 def _clean(s):
     s = _clean_regex.sub('', s)
     
