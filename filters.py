@@ -118,6 +118,28 @@ def _filter_identifier_in_month(regex_result, item):
 
 
 @generic_filter
+def _filter_identifier_in_month_after(regex_result, item):
+    selector = regex_result.groupdict()['selector']
+    the_day = regex_result.groupdict()['principle']
+    selector2 = regex_result.groupdict()['selector2']
+    the_day2 = regex_result.groupdict()['principle2']    
+
+    #calculate the 'after' date of the month
+    xs_in_month = _get_xs_in_month(the_day2, item.year, item.month)
+    after = datetime(item.year, item.month, xs_in_month[selector_indexes[selector2]])
+
+    acceptable_days = day_indexes[the_day]
+    selector_index = selector_indexes[selector]
+    
+    if item.weekday() in acceptable_days and after < item:
+        xs_in_month = _get_xs_in_month(the_day, item.year, item.month)
+        xs_in_month = [day for day in xs_in_month if day > after.day]  # have to skip those dates that came before the 'after' date
+        return xs_in_month[selector_index] == item.day
+
+    return False    
+
+
+@generic_filter
 def _filter_day_number_in_month(regex_result, item):
     selector = int(regex_result.groupdict()['selector'])
     return item.day == selector
