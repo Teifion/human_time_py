@@ -69,6 +69,10 @@ pipes = (
         generators._generator_day
     ),
 
+    (re.compile(r"^(?P<selector>{}) (?P<principle>{}) after (?P<selector2>{}) (?P<principle2>{}) of month$".format(consts.re_all_selector_names, consts.re_day_names, consts.re_all_selector_names, consts.re_day_names)),
+        [filters._cut_time, filters._filter_identifier_in_month_after], 
+        generators._generator_day
+    ),
 
     # Default implementation
     (re.compile(r"^(?P<principle>{})$".format(consts.re_time_periods)),
