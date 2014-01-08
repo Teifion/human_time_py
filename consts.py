@@ -11,7 +11,7 @@ re_all_selector_names = "first|1st|second|2nd|third|3rd|fourth|4th|last"
 re_day_names = "monday|tuesday|wednesday|thursday|friday|saturday|sunday"
 day_names = re_day_names.split("|")
 
-re_all_day_names = re_day_names + "|weekday|day"
+re_all_day_names = re_day_names + "|weekday|weekend|day"
 all_day_names = re_all_day_names.split("|")
 
 re_month_names = "january|february|march|april|may|june|july|august|september|october|november|december"

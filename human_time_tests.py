@@ -33,6 +33,12 @@ class HTTester(unittest.TestCase):
                 datetime(2013, 12, 9, 12),
             )),
             
+            ("weekend at 1500", (
+                datetime(2013, 12, 7, 15),
+                datetime(2013, 12, 8, 15),
+                datetime(2013, 12, 14, 15),
+            )),
+            
             ("every tuesday at 4:20am", (
                 datetime(2013, 12, 10, 4, 20),
                 datetime(2013, 12, 17, 4, 20),
