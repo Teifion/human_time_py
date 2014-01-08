@@ -11,6 +11,7 @@ Every other wednesday
 Weekday
 First friday of every month
 Last weekday of every month
+Every other weekend
 Thursday at 1200
 Weekday at 09:30
 Saturday at 4pm
@@ -46,11 +47,6 @@ Add a new entry to pipes, one of the first entries has extra comments to help.
 
 -- Todo --
 I'm pretty sure the pipes regex search could be improved if it were an actual parser.
-"""
-
-"""
-The main function. It returns the generator, a fuller readme
-is at the top of the file.
 """
 
 from datetime import datetime

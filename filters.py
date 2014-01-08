@@ -60,15 +60,15 @@ def generic_filter(filter_func):
     """
     def filter_(regex_result):
         def f(gen):
-            for v in gen:
-              if(filter_func(regex_result, v)):
-                yield v
+            for value in gen:
+                if(filter_func(regex_result, value)):
+                    yield value
         return f
     return filter_
 
 
 @generic_filter
-def _filter_allow(regex_result, item):
+def _filter_allow(regex_result, value):
     pass
 
 
@@ -83,10 +83,10 @@ def _filter_everyother(regex_result):
 
 
 @generic_filter
-def _filter_weekday(regex_result, item):
+def _filter_weekday(regex_result, value):
     the_day = regex_result.groupdict()['principle']
     acceptable_days = day_indexes[the_day]
-    return item.weekday() in acceptable_days
+    return value.weekday() in acceptable_days
 
 
 selector_indexes = dict(
@@ -144,9 +144,9 @@ _compiled_time_names = re.compile(consts.re_time_names.replace("?:", ""))
 _compiled_this_time = re.compile(consts.re_this_time)
 def _apply_time(regex_result):
     def f(gen, hour, minute):
-        for v in gen:
-            yield datetime(v.year, v.month, v.day, hour, minute)
-
+        for value in gen:
+            yield datetime(value.year, value.month, value.day, hour, minute)
+    
     the_time = regex_result.groupdict()['applicant']
     
     # First try it for 12 hour time
@@ -188,14 +188,14 @@ def _apply_time(regex_result):
     r = _compiled_this_time.match(the_time)
     if r:
         def f(gen):
-            for v in gen:
-                yield v
+            for value in gen:
+                yield value
         return f
 
     raise Exception("Unable to find time applicant for '{}'".format(the_time))
 
 def _cut_time(regex_result):
     def f(gen):
-        for v in gen:
-            yield datetime(v.year, v.month, v.day)
+        for value in gen:
+            yield datetime(value.year, value.month, value.day)
     return f

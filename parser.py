@@ -106,7 +106,7 @@ def _clean(s):
 
 """
 The main function. It returns the generator, a fuller readme
-is at the top of the file.
+is at the top of the __init__.py file.
 """
 def parse(timestring, start_time=None):
     if start_time is None:
