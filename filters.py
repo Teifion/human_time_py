@@ -9,7 +9,11 @@ import calendar
 import re
 from functools import partial
 from datetime import datetime, timedelta
-import consts
+
+try:
+    import consts
+except ImportError:
+    from . import consts
 
 day_indexes = dict(
     monday    = [0],
@@ -40,7 +44,7 @@ def generic_filter(filter_func):
     Function like:
     
     >>> def _filter_monday(regexp_result):
-    ...   monday = <process_regexp_result>  
+    ...   monday = <process_regexp_result>
     ...   def f(gen):
     ...     for v in gen:
     ...       if v == monday:

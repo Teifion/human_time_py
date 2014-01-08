@@ -2,7 +2,11 @@
 The parser side of things
 """
 
-import filters, generators, consts
+try:
+    import filters, generators, consts
+except ImportError:
+    from . import filters, generators, consts
+
 from datetime import datetime
 import re
 

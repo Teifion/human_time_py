@@ -1,6 +1,10 @@
 import unittest
-import human_time
 from datetime import datetime
+
+try:
+    import parser
+except ImportError:
+    from . import parser
 
 class HTTester(unittest.TestCase):
     def test_parse(self):
@@ -127,7 +131,7 @@ class HTTester(unittest.TestCase):
         self.longMessage = True
 
         for str_in, expected in vals:
-            gen = human_time.parse(str_in, start_time=start_time)
+            gen = parser.parse(str_in, start_time=start_time)
             
             for e in expected:
                 r = next(gen)
