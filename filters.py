@@ -7,7 +7,7 @@ The id impletmentation would be _filter_allow
 
 import calendar
 import re
-from functools import partial
+from functools import partial, wraps
 from datetime import datetime, timedelta
 import consts
 
@@ -54,6 +54,7 @@ def generic_filter(filter_func):
     ...   monday = <process_regexp_result>
     ...   return item == monday
     """
+    @wraps(filter_func)
     def filter_(regex_result):
         def f(gen):
             for v in gen:
