@@ -28,42 +28,42 @@ _ = _compile_format
 
 add_pipe(
     _("other (?P<principle>{})", consts.re_all_day_names),
-    [filters._cut_time, filters._filter_everyother, filters._filter_weekday],
+    [filters._filter_everyother, filters._filter_weekday],
     0
 )
 
 add_pipe(
     _("(?P<selector>{}) (?P<principle>{}) after (?P<selector2>{}) (?P<principle2>{}) of month", consts.re_all_selector_names, consts.re_day_names, consts.re_all_selector_names, consts.re_day_names),
-    [filters._cut_time, filters._filter_identifier_in_month_after],
+    [filters._filter_identifier_in_month_after],
     0
 )
 
 add_pipe(
     _("(?P<selector>{}) (?P<principle>{}) of month", consts.re_all_selector_names, consts.re_day_names),
-    [filters._cut_time, filters._filter_identifier_in_month],
+    [filters._filter_identifier_in_month],
     0
 )
 
 add_pipe(
     re.compile("(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of (?P<principle>month)"),
-    [filters._cut_time, filters._filter_day_number_in_month],
+    [filters._filter_day_number_in_month],
     0
 )
 
 add_pipe(
     re.compile("end of month"),
-    [filters._cut_time, filters._filter_end_of_month],
+    [filters._filter_end_of_month],
     0
 )
 
 add_pipe(
     _("(?P<principle>{})", consts.re_all_day_names),
-    [filters._cut_time, filters._filter_weekday],
+    [filters._filter_weekday],
     0
 )
 
 add_pipe(_("at (?P<applicant>{})", consts.re_all_time_names), [filters._apply_time], 1)
-
+add_pipe(_("^((?!at).)*$", consts.re_all_time_names), [filters._cut_time], 1)
 """Looks in the pipes list and selects a filter list and generator"""
 def _find_pipes(item):
     rfunc = generators._generator_day
@@ -73,22 +73,14 @@ def _find_pipes(item):
         for regexp, filters in mapping:
             result = regexp.search(item)
             if result:
-                l = map(lambda f: f(result), filters)
-                filter_functions.extend(l)
+                filter_functions.extend([filter_(result) for filter_ in filters])
                 break
 
 
     if filter_functions:
-        filter_functions.reverse()
+        #filter_functions.reverse()
         return consts.compose(*filter_functions), rfunc
-    """
-    for regexp, filters in pipes:
-        result = regexp.search(item)
-        if result:
 
-            func_list = (filter_(result) for filter_ in filters)
-            return consts.compose(*func_list), rfunc
-    """
     raise Exception("Unable to find pipe for item of '{}'".format(item))
 
 """
