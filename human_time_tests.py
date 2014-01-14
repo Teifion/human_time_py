@@ -98,6 +98,19 @@ class HTTester(unittest.TestCase):
                 datetime(2013, 12, 31, 18, 0),
                 datetime(2014, 1, 31, 18, 0),
             )),
+            
+            ("first monday after second sunday of month", (
+                datetime(2013, 12, 9),
+                datetime(2014, 1, 13),
+                datetime(2014, 2, 10),
+                datetime(2014, 3, 10),
+                datetime(2014, 4, 14),
+                datetime(2014, 5, 12),
+                datetime(2014, 6, 9),
+                datetime(2014, 7, 14),
+                datetime(2014, 8, 11),
+                datetime(2014, 9, 15),
+            )),
 
         )
         
