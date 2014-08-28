@@ -7,20 +7,20 @@ The sequence is represented as a generator without a temination so it must be tr
 Main functions is parse(), it returns a generator supplying the sequence
 
   Some example strings:
-Tuesday
-Every other wednesday
-Weekday
-First friday of every month
-Last weekday of every month
-Thursday at 1200
-Weekday at 09:30
-Saturday at 4pm
-Saturday at 4:30pm
-Sunday at noon
-Last friday of every month at 8am
-16th of every month
-4th of every month at 4pm
-Every Monday and every other tuesday
+ - Tuesday
+ - Every other wednesday
+ - Weekday
+ - First friday of every month
+ - Last weekday of every month
+ - Thursday at 1200
+ - Weekday at 09:30
+ - Saturday at 4pm
+ - Saturday at 4:30pm
+ - Sunday at noon
+ - Last friday of every month at 8am
+ - 16th of every month
+ - 4th of every month at 4pm
+ - Every Monday and every other tuesday
 
 You can test this module by running it with the string after the file name (you can use spaces)
 or without any arguments in which case it will prompt you for an input.
