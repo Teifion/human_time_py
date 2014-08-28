@@ -20,6 +20,7 @@ Sunday at noon
 Last friday of every month at 8am
 16th of every month
 4th of every month at 4pm
+Every Monday and every other tuesday
 
 You can test this module by running it with the string after the file name (you can use spaces)
 or without any arguments in which case it will prompt you for an input.

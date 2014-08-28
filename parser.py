@@ -132,7 +132,18 @@ def parse(timestring, start_time=None):
     if start_time is None:
         start_time = datetime.now()
     
-    filter_function, generator_function = _find_pipes(_clean(timestring))
-
-    for v in filter_function(generator_function(now=start_time)):
+    parts = timestring.split(" and ")
+    
+    generator_list = []
+    for p in parts:
+        filter_function, generator_function = _find_pipes(_clean(p))
+        def f():
+            for v in filter_function(generator_function(now=start_time)):
+                yield v
+        
+        generator_list.append(generators.ViewableGenerator(f))
+    
+    the_generator = generators.SortedGenerator(lambda a,b: a > b, generator_list)
+    
+    for v in the_generator:
         yield v
