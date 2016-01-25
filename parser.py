@@ -1,20 +1,11 @@
-"""
-The parser side of things
-"""
-
-try:
-    import filters, generators, consts
-except ImportError:
-    from . import filters, generators, consts
-
+import re
+import filters, generators, consts
 from datetime import datetime
 from collections import defaultdict, namedtuple
-import re
-
+from consts import DatePattern, TimePattern
 
 mapping = namedtuple('Mapping', 'pattern, filters')
 pipes = defaultdict(lambda: [])
-
 
 def add_pipe(regex, filters, priority):
     """Registers new pipe.
@@ -29,74 +20,60 @@ def add_pipe(regex, filters, priority):
     pipes[priority].append(item)
 
 
-
-# helper functions for
-# >>> _("regexp{}", params)
-# instead of
-# >>> re.compile("regexp{}".format(params))
-_compile_format = lambda s, *args: re.compile(s.format(*args))
-_ = _compile_format
-
-
-# every other Monday
-add_pipe(
-    _("other (?P<principle>{})", consts.re_all_day_names),
-    [filters._filter_everyother, filters._filter_weekday],
-    0
+default_pipes = (
+    (
+        (
+            # every other Monday
+            r"other (?P<principle>%(ALL_DAY_NAMES)s)" % vars(DatePattern),
+            [filters._filter_everyother, filters._filter_weekday]
+        ),
+        (
+            # first monday after second sunday of month
+            r"(?P<selector>%(SELECTOR_NAMES)s) (?P<principle>%(DAY_NAMES)s) after (?P<selector2>%(SELECTOR_NAMES)s) (?P<principle2>%(DAY_NAMES)s) of month" % vars(DatePattern),
+            [filters._filter_identifier_in_month_after]
+        ),
+        (
+            # first monday of month
+            r"(?P<selector>%(SELECTOR_NAMES)s) (?P<principle>%(DAY_NAMES)s) of month" % vars(DatePattern),
+            [filters._filter_identifier_in_month],
+        ),
+        (
+            # 1st of month
+            r"(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of (?P<principle>month)",
+            [filters._filter_day_number_in_month],
+        ),
+        (
+            # end of month
+            r"end of month",
+            [filters._filter_end_of_month],
+        ),
+        (
+            # friday
+            r"(?P<principle>%(ALL_DAY_NAMES)s)" % vars(DatePattern),
+            [filters._filter_weekday],
+        )
+    ),
+    (
+        (
+            r"at (?P<applicant>%(TIME_ALL)s)" % vars(TimePattern),
+            [filters._apply_time]
+        ),
+        (
+            r"^((?!at (?P<applicant>%(TIME_ALL)s)).)*$" % vars(TimePattern),
+            [filters._cut_time]
+        )
+    )
 )
 
-# first monday after second sunday of month
-add_pipe(
-    _("(?P<selector>{}) (?P<principle>{}) after (?P<selector2>{}) (?P<principle2>{}) of month", consts.re_all_selector_names, consts.re_day_names, consts.re_all_selector_names, consts.re_day_names),
-    [filters._filter_identifier_in_month_after],
-    0
-)
-
-# second Monday of month
-add_pipe(
-    _("(?P<selector>{}) (?P<principle>{}) of month", consts.re_all_selector_names, consts.re_day_names),
-    [filters._filter_identifier_in_month],
-    0
-)
-
-# 1st of month
-add_pipe(
-    re.compile("(?P<selector>[0-9]{1,2})(?:st|nd|rd|th)? of (?P<principle>month)"),
-    [filters._filter_day_number_in_month],
-    0
-)
-
-# end of month
-add_pipe(
-    re.compile("end of month"),
-    [filters._filter_end_of_month],
-    0
-)
-
-# friday
-add_pipe(
-    _("(?P<principle>{})", consts.re_all_day_names),
-    [filters._filter_weekday],
-    0
-)
-
-# apply time if string contains "at <time_pattern>"
-add_pipe(
-    _("at (?P<applicant>{})",  consts.re_all_time_names),
-    [filters._apply_time],
-    1
-)
-
-# cut time if string doesnt contain time pattern
-add_pipe(
-    _("^((?!at (?P<applicant>{})).)*$", consts.re_all_time_names),
-    [filters._cut_time],
-    1
-)
+# register default groups
+for priority, group in enumerate(default_pipes):
+    for regexp, filters in group:
+        add_pipe(re.compile(regexp), filters, priority)
 
 
-"""Looks in the pipes list and selects a filter list and generator"""
 def _find_pipes(item):
+    """Looks in the pipes list and selects a filter list"""
+
     filter_functions = []
 
     for priority, mapping in pipes.iteritems():
@@ -107,43 +84,37 @@ def _find_pipes(item):
                 break
 
     if filter_functions:
-        return consts.compose(*filter_functions), generators._generator_day
+        return filter_functions
 
     raise Exception("Unable to find pipe for item of '{}'".format(item))
 
-"""
-Clean up a string, remove double-spacing etc. Anything that might have been
-mis-entered by a user.
-"""
+
 _clean_regex = re.compile(r'every')
 def _clean(s):
+    """ Clean up a string, remove double-spacing etc. """
     s = _clean_regex.sub('', s)
-    
+
     while "  " in s:
         s = s.replace("  ", " ")
     
     return s.lower().strip()
 
-"""
-The main function. It returns the generator, a fuller readme
-is at the top of the __init__.py file.
-"""
-def parse(timestring, start_time=None):
+def parse(timestring, start_time=None, gen_func=None):
+    """Returns datetime generator with applied filters
+
+    @param timestring: human time expression
+    @param start_time: initial time
+    @param gen_func: tbd
+    """
+
     if start_time is None:
         start_time = datetime.now()
-    
-    parts = timestring.split(" and ")
-    
-    generator_list = []
-    for p in parts:
-        filter_function, generator_function = _find_pipes(_clean(p))
-        def f():
-            for v in filter_function(generator_function(now=start_time)):
-                yield v
-        
-        generator_list.append(generators.ViewableGenerator(f))
-    
-    the_generator = generators.SortedGenerator(lambda a,b: a > b, generator_list)
-    
-    for v in the_generator:
+
+    if gen_func is None:
+        gen_func = generators._generator_day
+
+    filter_functions = _find_pipes(_clean(timestring))
+    chained = consts.compose(filter_functions)
+
+    for v in chained(gen_func(now=start_time)):
         yield v
