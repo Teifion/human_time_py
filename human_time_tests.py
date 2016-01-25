@@ -121,9 +121,8 @@ class HTTester(unittest.TestCase):
                 datetime(2014, 8, 11),
                 datetime(2014, 9, 15),
             )),
-
         )
-        
+
         """
         A calendar of December 2013 (the month this date falls into)
         for your reference.

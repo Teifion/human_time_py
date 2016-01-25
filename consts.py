@@ -11,7 +11,7 @@ class DatePattern:
 
     SELECTOR_NAMES = "first|1st|second|2nd|third|3rd|fourth|4th|last"
     DAY_NAMES = "monday|tuesday|wednesday|thursday|friday|saturday|sunday"
-    ALL_DAY_NAMES = DAY_NAMES + "|weekday|day"
+    ALL_DAY_NAMES = DAY_NAMES + "|weekday|day|weekend"
     MONTH_NAMES = "january|february|march|april|may|june|july|august|september|october|november|december"
 
 class TimePattern:

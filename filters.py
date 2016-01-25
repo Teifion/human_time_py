@@ -57,7 +57,7 @@ def _filter_everyother(regex_result):
 @generic_filter
 def _filter_weekday(regex_result, value):
     the_day = regex_result.groupdict()['principle']
-    return item.weekday() in DAY_INDEXES[the_day]
+    return value.weekday() in DAY_INDEXES[the_day]
 
 def _get_xs_in_month(x, year, month):
     """Used to get all Xs from a month where X is something like Tuesday"""
